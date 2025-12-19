@@ -6,11 +6,32 @@ public static class RabbitPatternGenerator
     // Used when random colors are enabled in the preset
     static readonly Color[] realisticBunny = new Color[]
     {
-        new Color(0.45f, 0.30f, 0.20f), // brown
-        new Color(0.80f, 0.70f, 0.60f), // cream
-        new Color(0.15f, 0.15f, 0.15f), // dark
-        new Color(0.90f, 0.90f, 0.90f), // white
-        new Color(0.75f, 0.65f, 0.55f), // tan
+    // Browns
+    new Color(0.45f, 0.30f, 0.20f), // dark brown
+    new Color(0.55f, 0.38f, 0.25f), // chestnut
+    new Color(0.60f, 0.45f, 0.30f), // warm brown
+    new Color(0.50f, 0.35f, 0.25f), // cocoa
+
+    // Tans / fawn
+    new Color(0.75f, 0.65f, 0.55f), // tan
+    new Color(0.80f, 0.70f, 0.60f), // cream
+    new Color(0.85f, 0.78f, 0.68f), // light fawn
+    new Color(0.70f, 0.60f, 0.48f), // sandy
+
+    // Greys
+    new Color(0.65f, 0.65f, 0.65f), // light grey
+    new Color(0.55f, 0.55f, 0.55f), // medium grey
+    new Color(0.45f, 0.45f, 0.45f), // dark grey
+    new Color(0.35f, 0.35f, 0.35f), // charcoal
+
+    // Whites / near-whites
+    new Color(0.90f, 0.90f, 0.90f), // white
+    new Color(0.95f, 0.95f, 0.92f), // warm white
+    new Color(0.88f, 0.88f, 0.85f), // off-white
+
+    // Dark accents
+    new Color(0.20f, 0.18f, 0.16f), // near-black brown
+    new Color(0.15f, 0.15f, 0.15f), // dark (tips, spots)
     };
 
     // Generates a small tiling texture used as a fur overlay
