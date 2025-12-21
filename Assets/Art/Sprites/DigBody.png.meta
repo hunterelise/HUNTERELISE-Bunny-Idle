@@ -1,22 +1,28 @@
 fileFormatVersion: 2
-guid: e345a0852f6cc1e4cbe68d8db4d6324a
+guid: 9bfae86cdb7cc5347ad330c72c67567f
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 6191380116700803039
-    second: RunBody_0
+      213: 7733014165727876201
+    second: DigBody_0
   - first:
-      213: -4911878469521635958
-    second: RunBody_1
+      213: 1952776434027051944
+    second: DigBody_1
   - first:
-      213: 3089869536707108295
-    second: RunBody_2
+      213: 8873382805677934510
+    second: DigBody_2
   - first:
-      213: 3641928696837456260
-    second: RunBody_3
+      213: -4652963736335443522
+    second: DigBody_3
   - first:
-      213: -2736539628594587373
-    second: RunBody_4
+      213: -5745540686167063272
+    second: DigBody_4
+  - first:
+      213: 2842973857985231930
+    second: DigBody_5
+  - first:
+      213: -1268658651820303825
+    second: DigBody_6
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -190,13 +196,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: RunBody_0
+      name: DigBody_0
       rect:
         serializedVersion: 2
-        x: 8
-        y: 6
-        width: 16
-        height: 20
+        x: 0
+        y: 0
+        width: 32
+        height: 32
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -205,20 +211,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: fdf2e5da9633ce550800000000000000
-      internalID: 6191380116700803039
+      spriteID: 9641647996f215b60800000000000000
+      internalID: 7733014165727876201
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: RunBody_1
+      name: DigBody_1
       rect:
         serializedVersion: 2
-        x: 37
-        y: 7
-        width: 19
-        height: 20
+        x: 32
+        y: 0
+        width: 32
+        height: 32
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -227,20 +233,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: a8506446e8085dbb0800000000000000
-      internalID: -4911878469521635958
+      spriteID: 8abbfeb02d7a91b10800000000000000
+      internalID: 1952776434027051944
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: RunBody_2
+      name: DigBody_2
       rect:
         serializedVersion: 2
-        x: 68
-        y: 7
-        width: 20
-        height: 19
+        x: 64
+        y: 0
+        width: 32
+        height: 32
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -249,20 +255,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 7cd5ab909fb61ea20800000000000000
-      internalID: 3089869536707108295
+      spriteID: ea70e7806a6942b70800000000000000
+      internalID: 8873382805677934510
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: RunBody_3
+      name: DigBody_3
       rect:
         serializedVersion: 2
-        x: 105
-        y: 7
-        width: 15
-        height: 18
+        x: 96
+        y: 0
+        width: 32
+        height: 32
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -271,20 +277,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 4814c40aadaba8230800000000000000
-      internalID: 3641928696837456260
+      spriteID: eb993fe522a5d6fb0800000000000000
+      internalID: -4652963736335443522
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: RunBody_4
+      name: DigBody_4
       rect:
         serializedVersion: 2
-        x: 137
-        y: 7
-        width: 15
-        height: 18
+        x: 128
+        y: 0
+        width: 32
+        height: 32
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -293,8 +299,52 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 31917d3e4bbd50ad0800000000000000
-      internalID: -2736539628594587373
+      spriteID: 8154576ef2db340b0800000000000000
+      internalID: -5745540686167063272
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DigBody_5
+      rect:
+        serializedVersion: 2
+        x: 160
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a3c7eee39a5447720800000000000000
+      internalID: 2842973857985231930
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DigBody_6
+      rect:
+        serializedVersion: 2
+        x: 192
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f2a56058da1d46ee0800000000000000
+      internalID: -1268658651820303825
       vertices: []
       indices: 
       edges: []
@@ -303,7 +353,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 328c2b9ad42a81247bd5effdca0c1a94
+    spriteID: e9a2e33299103e640b32451881cd70e3
     internalID: 0
     vertices: []
     indices: 
@@ -313,11 +363,13 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      RunBody_0: 6191380116700803039
-      RunBody_1: -4911878469521635958
-      RunBody_2: 3089869536707108295
-      RunBody_3: 3641928696837456260
-      RunBody_4: -2736539628594587373
+      DigBody_0: 7733014165727876201
+      DigBody_1: 1952776434027051944
+      DigBody_2: 8873382805677934510
+      DigBody_3: -4652963736335443522
+      DigBody_4: -5745540686167063272
+      DigBody_5: 2842973857985231930
+      DigBody_6: -1268658651820303825
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

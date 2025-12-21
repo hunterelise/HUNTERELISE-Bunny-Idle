@@ -3,26 +3,25 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "FurPreset", menuName = "Rabbits/Fur Preset")]
 public class FurPreset : ScriptableObject
 {
-    [Header("Colors")]
-    // If true, colours are randomly chosen instead of using the values below
+    [Header("Color Scheme")]
     public bool useRandomColorScheme = true;
 
-    // Main fur color used as the base
+    [Tooltip("Used when Random scheme is OFF.")]
     public Color baseColor = new Color(0.75f, 0.65f, 0.55f, 1f);
 
-    // Secondary color used for spots or pattern variation
+    [Tooltip("Used when Random scheme is OFF.")]
     public Color secondaryColor = new Color(0.90f, 0.90f, 0.90f, 1f);
 
+    [Tooltip("Used when Random scheme is OFF. This tints the white outline.")]
+    public Color outlineDarkColor = new Color(0.20f, 0.18f, 0.16f, 1f);
+
     [Header("Pixel Fur Pattern")]
-    // Controls how large the pixel noise chunks are
-    // Higher values create bigger, blockier patterns
-    [Range(1, 64)] public int pixelNoiseScale = 12;
+    [Range(8, 256)]
+    public int textureSize = 64;
 
-    // Width and height of the generated fur texture
-    // Smaller values look more pixelated
-    [Range(8, 256)] public int textureSize = 64;
+    [Tooltip("Bigger = chunkier blocks. Good values: 8–16 for 64px texture.")]
+    [Range(1, 64)]
+    public int pixelNoiseScale = 12;
 
-    // If true, uses point filtering for a sharp pixel look
-    // If false, uses bilinear filtering for smoother blending
     public bool pointFilter = true;
 }

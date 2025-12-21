@@ -1,111 +1,124 @@
 using UnityEngine;
 
-[RequireComponent(typeof(SpriteRenderer))]
 public class RabbitFur2D : MonoBehaviour
 {
     [Header("References (drag these in)")]
-    // The main body sprite renderer that changes frames during animation
-    [SerializeField] private SpriteRenderer bodyRenderer;
-
-    // The sprite renderer used to draw the fur texture on top of the body
-    [SerializeField] private SpriteRenderer furRenderer;
-
-    // A mask that clips the fur so it only appears inside the body shape
-    [SerializeField] private SpriteMask bodyMask;
+    [SerializeField] private SpriteRenderer bodyRenderer;     // Body sprites animate here
+    [SerializeField] private SpriteRenderer furRenderer;      // FurOverlay renderer (masked)
+    [SerializeField] private SpriteMask bodyMask;             // BodyMask (clips FurOverlay)
+    [SerializeField] private SpriteRenderer outlineRenderer;  // WHITE outline sprites animate here
 
     [Header("PCG")]
-    // Settings that control how the fur texture is generated
     public FurPreset preset;
 
-    // Seed controls randomness so each rabbit can have unique fur
-    // If seed is -1 we choose a random seed when this rabbit is created
-    [Tooltip("If -1, choose a random seed once per bunny instance.")]
+    [Tooltip("If -1, chooses a random seed once per bunny instance.")]
     public int seed = -1;
 
-    [Header("Optional")]
-    // If the body sprites are white, tinting helps match them to the fur base color
-    [Tooltip("Tint the body sprite to match base color (recommended if body is white).")]
+    [Header("Options")]
+    [Tooltip("Tint the body sprite to match the chosen base fur color (best if body sprites are white).")]
     public bool tintBodyToBaseColor = true;
 
-    // The generated fur texture
-    Texture2D furTex;
+    [Tooltip("Tint the outline to be a darker version of the base fur color.")]
+    public bool tintOutlineToDarkerBase = true;
 
-    // A sprite created from the generated texture
-    Sprite furSprite;
+    [Tooltip("Outline darkness factor. 0.55–0.7 is usually best. Lower = darker.")]
+    [Range(0.3f, 0.95f)]
+    public float outlineDarkness = 0.65f;
 
-    // Used to ensure we only generate once unless rerolled
-    bool initialized;
+    [Tooltip("Minimum channel value for outline tint (prevents very dark bunnies turning outline near-black).")]
+    [Range(0f, 0.4f)]
+    public float outlineFloor = 0.12f;
+
+    [Header("Overlay Sprite Settings")]
+    [Tooltip("Pixels Per Unit used when creating the overlay sprite. Doesn't need to match art exactly; it's just for display scale.")]
+    public float overlayPixelsPerUnit = 100f;
+
+    private Texture2D furTex;
+    private Sprite furSprite;
+    private bool initialized;
 
     void Awake()
     {
-        // Pick a random seed for this rabbit if none was provided
         if (seed == -1) seed = Random.Range(1, int.MaxValue);
-
-        // Build the fur overlay the first time
         InitOnce();
     }
 
     void LateUpdate()
     {
-        // Keep the mask sprite matched to the current body animation frame
-        // LateUpdate is used so the body animation has already updated this frame
+        // Keep mask synced to current Body animation frame (Idle/Run/Dig/Jump...)
         if (bodyMask != null && bodyRenderer != null)
             bodyMask.sprite = bodyRenderer.sprite;
     }
 
     void InitOnce()
     {
-        // Do not regenerate if we already generated successfully
         if (initialized) return;
         initialized = true;
 
-        // Stop if required references are missing
         if (!preset || !bodyRenderer || !furRenderer || !bodyMask)
         {
-            Debug.LogWarning("RabbitFurOverlay2D: Missing preset or references.", this);
+            Debug.LogWarning("RabbitFur2D: Missing preset or references.", this);
             return;
         }
 
-        // Generate the fur texture using the preset and seed
-        // baseCol is returned so we can optionally tint the body to match
-        furTex = RabbitPatternGenerator.GenerateFurTexture(preset, seed, out var baseCol, out _);
+        // Generate fur texture + chosen colors
+        furTex = RabbitPatternGenerator.GenerateFurTexture(
+            preset, seed,
+            out var baseCol,
+            out var secondaryCol,
+            out var _ // outlineDark (unused now; outline derived from base)
+        );
 
-        // Repeat allows the texture to tile across the sprite area
+        if (furTex == null) return;
+
         furTex.wrapMode = TextureWrapMode.Repeat;
-
-        // Choose filtering style for the look you want
-        // Point gives a pixel look, bilinear gives a smoother look
         furTex.filterMode = preset.pointFilter ? FilterMode.Point : FilterMode.Bilinear;
 
-        // Create a sprite from the texture for the fur renderer to display
+        // Create overlay sprite from texture
         furSprite = Sprite.Create(
             furTex,
             new Rect(0, 0, furTex.width, furTex.height),
             new Vector2(0.5f, 0.5f),
-            pixelsPerUnit: 100f
+            pixelsPerUnit: overlayPixelsPerUnit
         );
 
-        // Assign the overlay sprite so the fur draws on top of the body
         furRenderer.sprite = furSprite;
 
-        // Optionally tint the body to match the fur base color
+        // Tint body (optional)
         if (tintBodyToBaseColor)
             bodyRenderer.color = baseCol;
+
+        // Tint outline to a darker version of base fur (outline art must be white for this to work)
+        if (tintOutlineToDarkerBase && outlineRenderer != null)
+            outlineRenderer.color = DarkenWithFloor(baseCol, outlineDarkness, outlineFloor);
     }
 
+    /// <summary>
+    /// Darkens a color by multiplying RGB by factor, with a minimum floor per channel.
+    /// factor ~0.55–0.7 is usually good for pixel outlines.
+    /// </summary>
+    static Color DarkenWithFloor(Color c, float factor, float floor)
+    {
+        return new Color(
+            Mathf.Max(Mathf.Clamp01(c.r * factor), floor),
+            Mathf.Max(Mathf.Clamp01(c.g * factor), floor),
+            Mathf.Max(Mathf.Clamp01(c.b * factor), floor),
+            c.a
+        );
+    }
+
+    /// <summary>
+    /// Optional: reroll appearance (useful if you pool rabbits and want new looks on reuse).
+    /// </summary>
     public void Reroll(int newSeed = -1)
     {
-        // Choose a new seed, random if newSeed is not provided
         seed = (newSeed == -1) ? Random.Range(1, int.MaxValue) : newSeed;
 
-        // Force regeneration next time InitOnce is called
         initialized = false;
 
-        // Clean up old generated assets to avoid memory leaks
-        if (furSprite) Destroy(furSprite);
-        if (furTex) Destroy(furTex);
+        if (furSprite != null) Destroy(furSprite);
+        if (furTex != null) Destroy(furTex);
 
-        // Generate again with the new seed
         InitOnce();
     }
 }
