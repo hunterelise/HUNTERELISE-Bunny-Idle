@@ -5,22 +5,22 @@ using UnityEngine.Tilemaps;
 public class DigManager : MonoBehaviour
 {
     [Header("References")]
-    // Tilemap that stores the real ground tiles used for gameplay logic
+    // Tilemap that holds the real ground tiles for gameplay logic
     public Tilemap groundTilemap;
 
-    // Grid that stores which cells are empty or solid for movement and pathing
+    // Node grid that tracks which cells are empty or solid for movement and pathfinding
     public NodeGrid nodeGrid;
 
-    // Optional system that places visual dug tiles on a separate tilemap
+    // Optional system that places a dug visual tile on a separate tilemap
     public DugTileSpawner dugTileSpawner;
 
     [Header("Base Tiles")]
-    // Main ground tile types
+    // Main tile types used in the ground tilemap
     public TileBase mud;
     public TileBase stone;
 
     [Header("Ore Tiles")]
-    // Ore tiles used for gem value and ore detection
+    // Ore tile types used for gem value and ore detection
     public TileBase oreGreen, oreBlue, orePurple, orePink, oreYellow;
 
     [Header("HP")]
@@ -33,15 +33,15 @@ public class DigManager : MonoBehaviour
     // Current hit points for each solid cell
     private readonly Dictionary<Vector3Int, int> hp = new();
 
-    // Max hit points for each solid cell, used for damage visuals
+    // Max hit points for each solid cell used for damage visuals
     private readonly Dictionary<Vector3Int, int> maxHp = new();
 
-    // Dig frontier is the set of solid cells next to empty space
+    // Solid cells that touch an empty cell and can be dug next
     private readonly HashSet<Vector3Int> frontier = new();
 
     public void BuildFromTilemap()
     {
-        // Clear old state before rebuilding
+        // Reset stored state before scanning the tilemap
         hp.Clear();
         maxHp.Clear();
         frontier.Clear();
@@ -53,30 +53,30 @@ public class DigManager : MonoBehaviour
             return;
         }
 
-        // Scan all positions inside tilemap bounds
+        // Scan every cell in the tilemap bounds
         var bounds = groundTilemap.cellBounds;
 
         foreach (var pos in bounds.allPositionsWithin)
         {
-            // Any non null tile is considered solid and diggable
+            // If there is no tile, the cell is empty and not diggable
             var t = groundTilemap.GetTile(pos);
             if (t == null) continue;
 
-            // Decide max HP based on tile type
+            // Decide max HP for this tile type
             int m = GetMaxHpForTile(t);
             if (m <= 0) continue;
 
-            // Store both current HP and max HP
+            // Store HP values for this solid cell
             hp[pos] = m;
             maxHp[pos] = m;
 
-            // Ensure tile starts fully visible
+            // Reset opacity to fully visible on rebuild
             var c = groundTilemap.GetColor(pos);
             c.a = 1f;
             groundTilemap.SetColor(pos, c);
         }
 
-        // After HP is built, compute which tiles are on the frontier
+        // Compute which solid cells are exposed to empty space
         RebuildFrontier();
     }
 
@@ -86,7 +86,7 @@ public class DigManager : MonoBehaviour
         if (t == mud) return mudHp;
         if (t == stone) return stoneHp;
 
-        // Ores are treated as stone durability
+        // Ores use the same HP as stone
         if (IsOreTile(t)) return stoneHp;
 
         // Unknown tiles are ignored
@@ -96,29 +96,29 @@ public class DigManager : MonoBehaviour
     bool IsOreTile(TileBase t)
         => t == oreGreen || t == oreBlue || t == orePurple || t == orePink || t == oreYellow;
 
-    // True if this cell is currently tracked as solid and diggable
+    // True if this cell has HP tracking, meaning it is solid
     public bool IsSolid(Vector3Int cell) => hp.ContainsKey(cell);
 
-    // Returns the set of diggable frontier cells
+    // Exposes the current frontier set
     public IEnumerable<Vector3Int> GetFrontier() => frontier;
 
-    // Returns max HP for a cell, or zero if not tracked
+    // Returns max HP for a cell, or 0 if not tracked
     public int GetMaxHp(Vector3Int cell) => maxHp.TryGetValue(cell, out var m) ? m : 0;
 
-    // Tile type checks used by BunnyAgent for mode decisions
+    // Tile type checks used by other scripts
     public bool IsOreCell(Vector3Int cell) => IsOreTile(groundTilemap.GetTile(cell));
     public bool IsMudCell(Vector3Int cell) => groundTilemap.GetTile(cell) == mud;
     public bool IsStoneCell(Vector3Int cell) => groundTilemap.GetTile(cell) == stone;
 
     public int GetMaterialsYield(Vector3Int cell)
     {
-        // Returns how many basic materials a tile gives when dug
+        // Returns how many basic materials a dug tile should give
         var t = groundTilemap.GetTile(cell);
 
         if (t == mud) return 1;
         if (t == stone) return 3;
 
-        // Ores are not counted as materials so materials mode does not chase them
+        // Ores are not counted as materials
         if (IsOreTile(t)) return 0;
 
         return 0;
@@ -126,7 +126,7 @@ public class DigManager : MonoBehaviour
 
     public int GetGemsValue(Vector3Int cell)
     {
-        // Returns gem value for ore tiles, used by ores mode
+        // Returns gem value for ore tiles, or 0 for non ore tiles
         var t = groundTilemap.GetTile(cell);
 
         if (t == oreYellow) return 100;
@@ -138,10 +138,9 @@ public class DigManager : MonoBehaviour
         return 0;
     }
 
-    // Scans the tilemap to find all ore cells
-    // This is simple but can be expensive, so caching is a future optimization
     public IEnumerable<Vector3Int> GetAllOreCells()
     {
+        // Scans the full tilemap and yields positions that contain ore tiles
         if (groundTilemap == null) yield break;
 
         var bounds = groundTilemap.cellBounds;
@@ -153,9 +152,9 @@ public class DigManager : MonoBehaviour
         }
     }
 
-    // Scans the tilemap to find all stone cells
     public IEnumerable<Vector3Int> GetAllStoneCells()
     {
+        // Scans the full tilemap and yields positions that contain stone tiles
         if (groundTilemap == null) yield break;
 
         var bounds = groundTilemap.cellBounds;
@@ -169,7 +168,7 @@ public class DigManager : MonoBehaviour
 
     public void RebuildFrontier()
     {
-        // Frontier is any solid tile adjacent to an empty walkable cell
+        // Frontier is any solid cell that has an empty neighbor
         frontier.Clear();
 
         foreach (var cell in hp.Keys)
@@ -179,7 +178,7 @@ public class DigManager : MonoBehaviour
 
     bool IsAdjacentToEmpty(Vector3Int cell)
     {
-        // If any neighbor is walkable, this solid tile can be dug next
+        // If any neighbor is walkable, this solid tile is a frontier tile
         foreach (var n in Neighbors4(cell))
             if (nodeGrid.IsWalkable(n))
                 return true;
@@ -189,7 +188,7 @@ public class DigManager : MonoBehaviour
 
     bool HasAnyStandCell(Vector3Int solid)
     {
-        // Bunny must have a walkable neighbor to stand on to dig this solid
+        // Bunny can only dig a tile if it can stand next to it
         foreach (var n in Neighbors4(solid))
             if (nodeGrid.IsWalkable(n))
                 return true;
@@ -197,29 +196,27 @@ public class DigManager : MonoBehaviour
         return false;
     }
 
-    // Returns a list of nearby frontier tiles sorted by distance
-    // BunnyAgent applies mode logic to choose among these candidates
     public List<Vector3Int> GetFrontierCandidates(Vector3Int bunnyCell, int radius, int maxCount)
     {
-        // Store both cell and distance so we can sort
+        // Builds a list of frontier tiles near the bunny, sorted by distance
         var list = new List<(Vector3Int cell, int dist)>();
 
         foreach (var p in frontier)
         {
-            // Use Manhattan distance for grid based range checks
+            // Manhattan distance on the grid
             int dist = Mathf.Abs(p.x - bunnyCell.x) + Mathf.Abs(p.y - bunnyCell.y);
             if (dist > radius) continue;
 
-            // Skip targets the bunny cannot stand next to
+            // Skip targets that have no place to stand
             if (!HasAnyStandCell(p)) continue;
 
             list.Add((p, dist));
         }
 
-        // Sort nearest first so we evaluate closer options first
+        // Nearest first
         list.Sort((a, b) => a.dist.CompareTo(b.dist));
 
-        // Return only up to maxCount entries
+        // Limit the amount returned to keep planning fast
         var result = new List<Vector3Int>(Mathf.Min(maxCount, list.Count));
         for (int i = 0; i < list.Count && result.Count < maxCount; i++)
             result.Add(list[i].cell);
@@ -233,7 +230,7 @@ public class DigManager : MonoBehaviour
         if (!hp.TryGetValue(cell, out var curHp))
             return false;
 
-        // Reduce HP by at least 1
+        // Reduce HP by at least 1 each hit
         curHp -= Mathf.Max(1, hitDamage);
 
         // Break the tile when HP reaches zero
@@ -243,7 +240,7 @@ public class DigManager : MonoBehaviour
             return true;
         }
 
-        // Store updated HP and adjust tile opacity for feedback
+        // Store new HP and update opacity feedback
         hp[cell] = curHp;
         UpdateOpacityStages(cell);
         return false;
@@ -251,7 +248,7 @@ public class DigManager : MonoBehaviour
 
     void UpdateOpacityStages(Vector3Int cell)
     {
-        // Adjust opacity in simple steps based on remaining HP
+        // Uses simple opacity steps to show tile damage
         int cur = hp[cell];
         int max = maxHp[cell];
 
@@ -270,13 +267,13 @@ public class DigManager : MonoBehaviour
 
     void BreakTile(Vector3Int cell)
     {
-        // Remove the logic tile so the cell becomes empty
+        // Remove tile from logic tilemap so the cell becomes empty
         groundTilemap.SetTile(cell, null);
 
-        // Reset color so future tiles are not tinted
+        // Reset color to avoid leftover opacity on future tiles
         groundTilemap.SetColor(cell, Color.white);
 
-        // Update the node grid so pathfinding sees the cell as walkable
+        // Update the node grid so pathfinding sees this as walkable
         nodeGrid.SetEmpty(cell);
 
         // Place a dug visual tile if the visual system exists
@@ -287,13 +284,13 @@ public class DigManager : MonoBehaviour
         hp.Remove(cell);
         maxHp.Remove(cell);
 
-        // Frontier may change when a tile breaks, so rebuild it
+        // Frontier changes when tiles break, so rebuild it
         RebuildFrontier();
     }
 
     static IEnumerable<Vector3Int> Neighbors4(Vector3Int p)
     {
-        // Four direction neighbors on the grid
+        // Four direction neighbors used for adjacency checks
         yield return p + Vector3Int.right;
         yield return p + Vector3Int.left;
         yield return p + Vector3Int.up;
